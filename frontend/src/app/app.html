@@ -317,23 +317,29 @@
         </select>
       </div>
       <div class="form-group">
-        <label>หมวดหมู่</label>
+        <label>หมวดหมู่ <span class="required-star">*</span></label>
         <select [(ngModel)]="productForm.category" class="form-input">
           <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
         </select>
       </div>
-      <div class="form-group"><label>ผู้ผลิต</label><input type="text" [(ngModel)]="productForm.producerName"></div>
-      <div class="form-group"><label>เบอร์โทร</label><input type="text" [(ngModel)]="productForm.phone"></div>
+      <div class="form-group">
+        <label>ผู้ผลิต <span class="required-star">*</span></label>
+        <input type="text" [(ngModel)]="productForm.producerName">
+      </div>
+      <div class="form-group">
+        <label>เบอร์โทร <span class="required-star">*</span></label>
+        <input type="text" [(ngModel)]="productForm.phone">
+      </div>
     </div>
     
     <div class="form-group mt-3">
-      <label>รายละเอียด</label>
+      <label>รายละเอียด <span class="required-star">*</span></label>
       <textarea [(ngModel)]="productForm.description" rows="2"></textarea>
     </div>
 
     <!-- 📸 กล่อง Drag & Drop อัปโหลดรูปภาพ (มีได้หลายภาพ ทั้งโหมดแก้ไขและเพิ่ม) -->
     <div class="form-group mt-3">
-      <label>รูปภาพสินค้า (อัปโหลดได้หลายภาพ)</label>
+      <label>รูปภาพสินค้า (อัปโหลดได้หลายภาพ) <span class="required-star">*</span></label>
       <div 
         class="upload-drop-zone"
         [class.dragging]="isDragging"
@@ -367,10 +373,10 @@
       </div>
     </div>
 
-    <!-- 📦 ล็อตสินค้า (Lots): เพิ่มได้หลายล็อต (ไม่บังคับใส่ แต่ถ้าใส่ต้องกรอกราคาและจำนวน) -->
+    <!-- 📦 จัดการล็อตสินค้า -->
     <div class="lots-section">
       <div class="lots-header">
-        <div class="lots-title">📦 จัดการล็อตสินค้า (ไม่บังคับ)</div>
+        <div class="lots-title">📦 จัดการล็อตสินค้า</div>
         <button type="button" class="btn-add-lot" (click)="addLot()">➕ เพิ่มล็อตสินค้า</button>
       </div>
 
@@ -381,7 +387,7 @@
       <div class="lot-list" *ngIf="productForm.lots && productForm.lots.length > 0">
         <div class="lot-row" *ngFor="let lot of productForm.lots; let i = index">
           <div class="lot-col">
-            <label class="lot-input-label">ชื่อล็อต</label>
+            <label class="lot-input-label">ชื่อล็อต <span class="required-star">*</span></label>
             <input type="text" [(ngModel)]="lot.lotNumber" placeholder="เช่น ล็อตที่ {{ i + 1 }}">
           </div>
           <div class="lot-col">
