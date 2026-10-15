@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from './services/product.service';
@@ -57,7 +57,11 @@ export class App implements OnInit {
   showAboutModal: boolean = false;
   isUploading: boolean = false;
 
-  constructor(private productService: ProductService, private http: HttpClient) {}
+  constructor(
+    private productService: ProductService,
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.loadProducts();
@@ -105,9 +109,11 @@ export class App implements OnInit {
 
   closeLogin() {
     this.showLoginModal = false;
+    this.isLoggingIn = false;
     this.loginUser = '';
     this.loginPass = '';
     this.loginError = '';
+    this.cdr.detectChanges();
   }
 
   openRegister() {
@@ -119,8 +125,10 @@ export class App implements OnInit {
 
   closeRegister() {
     this.showRegisterModal = false;
+    this.isRegistering = false;
     this.registerError = '';
     this.resetRegisterForm();
+    this.cdr.detectChanges();
   }
 
   switchToRegister() {
@@ -172,23 +180,39 @@ export class App implements OnInit {
     }
 
     this.isRegistering = true;
+    this.cdr.detectChanges();
+
     this.productService.register(this.registerForm).subscribe({
       next: (res) => {
-        this.isRegistering = false;
-        this.currentUser = res.user;
+        const user = res.user || {
+          username: this.registerForm.username,
+          role: 'USER',
+          fullName: this.registerForm.fullName || this.registerForm.username
+        };
+        this.currentUser = user;
         this.isLoggedIn = true;
-        this.isAdmin = res.user.role === 'ADMIN';
+        this.isAdmin = user.role === 'ADMIN';
 
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('adminToken', res.token);
-        localStorage.setItem('currentUser', JSON.stringify(res.user));
+        if (res.token) {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('adminToken', res.token);
+        }
+        localStorage.setItem('currentUser', JSON.stringify(user));
 
+        // 1. ปิดหน้าต่าง Modal ทันที และบังคับให้ Angular ลบออกจากหน้าจอ
         this.closeRegister();
-        alert(`🎉 ยินดีต้อนรับคุณ ${res.user.fullName || res.user.username} สมัครสมาชิกสำเร็จ!`);
+        this.cdr.detectChanges();
+
+        // 2. แจ้งเตือนแบบไม่ขัดขวางการปิดหน้าต่าง
+        const welcomeName = user.fullName || user.username || 'สมาชิกใหม่';
+        setTimeout(() => {
+          alert(`🎉 ยินดีต้อนรับคุณ ${welcomeName} สมัครสมาชิกสำเร็จ!`);
+        }, 50);
       },
       error: (err) => {
         this.isRegistering = false;
         this.registerError = err.error?.message || '❌ การสมัครสมาชิกล้มเหลว กรุณาลองใหม่อีกครั้ง';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -204,9 +228,10 @@ export class App implements OnInit {
     }
 
     this.isLoggingIn = true;
+    this.cdr.detectChanges();
+
     this.productService.login(this.loginUser, this.loginPass).subscribe({
       next: (res) => {
-        this.isLoggingIn = false;
         const user = res.user || {
           username: this.loginUser,
           role: this.loginUser === 'admin' ? 'ADMIN' : 'USER',
@@ -216,16 +241,26 @@ export class App implements OnInit {
         this.isLoggedIn = true;
         this.isAdmin = user.role === 'ADMIN';
 
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('adminToken', res.token);
+        if (res.token) {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('adminToken', res.token);
+        }
         localStorage.setItem('currentUser', JSON.stringify(user));
 
+        // 1. ปิดหน้าต่าง Modal ทันที และบังคับให้ Angular ลบออกจากหน้าจอ
         this.closeLogin();
-        alert(`✅ เข้าสู่ระบบสำเร็จ ยินดีต้อนรับคุณ ${user.fullName || user.username}`);
+        this.cdr.detectChanges();
+
+        // 2. แจ้งเตือนแบบไม่ขัดขวางการปิดหน้าต่าง
+        const welcomeName = user.fullName || user.username || 'ผู้ใช้งาน';
+        setTimeout(() => {
+          alert(`✅ เข้าสู่ระบบสำเร็จ ยินดีต้อนรับคุณ ${welcomeName}`);
+        }, 50);
       },
       error: (err) => {
         this.isLoggingIn = false;
         this.loginError = err.error?.message || '❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+        this.cdr.detectChanges();
       }
     });
   }
