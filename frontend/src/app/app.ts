@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductService } from './services/product.service';
 import { Product, CommunityProducer, MOCK_PRODUCERS } from './mock-products'; 
 import { SOUTHERN_PROVINCES, DISTRICTS_BY_PROVINCE, SUB_DISTRICTS_BY_LOCATION } from './data/locations';
+import { INITIAL_PRODUCTS } from './data/initial-products';
 
 @Component({
   selector: 'app-root',
@@ -115,8 +116,21 @@ export class App implements OnInit {
 
   loadProducts() {
     this.productService.getProducts().subscribe({
-      next: (data) => this.products = data,
-      error: (err) => console.error('ดึงข้อมูลล้มเหลว:', err)
+      next: (data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          this.products = data;
+        } else {
+          // หากฐานข้อมูลว่าง หรือยังไม่ได้ seed ข้อมูล ให้แสดงข้อมูลเริ่มต้นทันที
+          this.products = INITIAL_PRODUCTS;
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.warn('ดึงข้อมูลจากเซิร์ฟเวอร์ขัดข้อง กำลังแสดงข้อมูลสำรอง:', err);
+        // แสดงข้อมูลเริ่มต้นทันที แม้ Backend กำลัง sleep หรือติด network error
+        this.products = INITIAL_PRODUCTS;
+        this.cdr.detectChanges();
+      }
     });
   }
 
