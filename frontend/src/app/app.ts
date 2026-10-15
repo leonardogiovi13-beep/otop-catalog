@@ -3,7 +3,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from './services/product.service';
-import { Product, CommunityProducer, MOCK_PRODUCERS } from './mock-products'; 
+import { Product, CommunityProducer, MOCK_PRODUCERS, CartItem, ProductLot } from './mock-products'; 
 import { SOUTHERN_PROVINCES, DISTRICTS_BY_PROVINCE, SUB_DISTRICTS_BY_LOCATION } from './data/locations';
 import { INITIAL_PRODUCTS } from './data/initial-products';
 
@@ -21,6 +21,153 @@ export class App implements OnInit {
   selectedCategory: string = 'ทั้งหมด';
   searchTerm: string = '';
   selectedProduct: Product | null = null;
+
+  // ตะกร้าสินค้า
+  cartItems: CartItem[] = [];
+  showCartModal: boolean = false;
+  showOrderSuccessModal: boolean = false;
+
+  get cartTotalCount(): number {
+    return this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  get cartTotalPrice(): number {
+    return this.cartItems.reduce((sum, item) => sum + (this.getProductPrice(item.product) * item.quantity), 0);
+  }
+
+  // คำนวณราคาของสินค้า (ถ้ามีล็อตจะแสดงราคาของล็อต หรือราคาหลัก)
+  getProductPrice(product: Product): number {
+    if (product.lots && product.lots.length > 0) {
+      return product.lots[0].price;
+    }
+    return product.price || 0;
+  }
+
+  // คำนวณจำนวนสต็อกคงเหลือรวมของสินค้า
+  getProductStock(product: Product): number {
+    if (product.lots && product.lots.length > 0) {
+      return product.lots.reduce((sum, lot) => sum + (Number(lot.stock) || 0), 0);
+    }
+    return product.stock || 0;
+  }
+
+  // เพิ่มสินค้าลงในตะกร้า
+  addToCart(product: Product, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    const availableStock = this.getProductStock(product);
+    if (availableStock <= 0) {
+      alert('⚠️ สินค้านี้หมดชั่วคราว');
+      return;
+    }
+
+    const existing = this.cartItems.find(item => item.product.id === product.id);
+    if (existing) {
+      if (existing.quantity < availableStock) {
+        existing.quantity += 1;
+      } else {
+        alert(`⚠️ จำนวนสินค้าในตะกร้าถึงขีดจำกัดคงเหลือแล้ว (${availableStock} ชิ้น)`);
+      }
+    } else {
+      this.cartItems.push({
+        product: product,
+        quantity: 1
+      });
+    }
+    this.saveCartToStorage();
+  }
+
+  // ลดจำนวนสินค้าในตะกร้า
+  decreaseCartQuantity(item: CartItem) {
+    if (item.quantity > 1) {
+      item.quantity -= 1;
+    } else {
+      this.removeCartItem(item);
+    }
+    this.saveCartToStorage();
+  }
+
+  // เพิ่มจำนวนสินค้าในตะกร้า
+  increaseCartQuantity(item: CartItem) {
+    const availableStock = this.getProductStock(item.product);
+    if (item.quantity < availableStock) {
+      item.quantity += 1;
+    } else {
+      alert(`⚠️ จำนวนสินค้าถึงขีดจำกัดคงเหลือแล้ว (${availableStock} ชิ้น)`);
+    }
+    this.saveCartToStorage();
+  }
+
+  // ตรวจสอบเมื่อผู้ใช้พิมพ์แก้ไขจำนวนสินค้าใน input ด้วยตนเอง
+  onQuantityChange(item: CartItem) {
+    const availableStock = this.getProductStock(item.product);
+    if (item.quantity === null || item.quantity === undefined || isNaN(item.quantity) || item.quantity < 1) {
+      item.quantity = 1;
+    } else if (item.quantity > availableStock) {
+      item.quantity = availableStock;
+      alert(`⚠️ มีสินค้าคงเหลือเพียง ${availableStock} ชิ้น`);
+    } else {
+      item.quantity = Math.floor(item.quantity);
+    }
+    this.saveCartToStorage();
+  }
+
+  // ลบสินค้าออกจากตะกร้า
+  removeCartItem(item: CartItem) {
+    this.cartItems = this.cartItems.filter(i => i.product.id !== item.product.id);
+    this.saveCartToStorage();
+  }
+
+  openCart() {
+    this.showCartModal = true;
+  }
+
+  closeCart() {
+    this.showCartModal = false;
+  }
+
+  // บันทึกตะกร้าลง LocalStorage
+  private saveCartToStorage() {
+    try {
+      localStorage.setItem('otop_cart', JSON.stringify(this.cartItems));
+    } catch (e) {
+      console.warn('Cannot save cart to storage:', e);
+    }
+  }
+
+  // โหลดตะกร้าจาก LocalStorage
+  private loadCartFromStorage() {
+    try {
+      const saved = localStorage.getItem('otop_cart');
+      if (saved) {
+        this.cartItems = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.warn('Cannot load cart from storage:', e);
+    }
+  }
+
+  // สั่งซื้อสินค้า
+  checkout() {
+    if (this.cartItems.length === 0) {
+      alert('⚠️ ตะกร้าสินค้าของคุณว่างเปล่า');
+      return;
+    }
+
+    // ล้างตะกร้า
+    this.cartItems = [];
+    this.saveCartToStorage();
+    this.closeCart();
+
+    // แสดง Modal กล่องข้อความยืนยันการสั่งซื้อสำเร็จ
+    this.showOrderSuccessModal = true;
+    this.cdr.detectChanges();
+  }
+
+  closeOrderSuccessModal() {
+    this.showOrderSuccessModal = false;
+  }
 
   // 14 Southern provinces and hierarchical location data
   southernProvinces: string[] = SOUTHERN_PROVINCES;
@@ -89,6 +236,7 @@ export class App implements OnInit {
   ngOnInit() {
     this.loadProducts();
     this.initAuth();
+    this.loadCartFromStorage();
   }
 
   // โหลดสถานะการเข้าสู่ระบบจาก LocalStorage
@@ -114,21 +262,36 @@ export class App implements OnInit {
     }
   }
 
+  private normalizeProducts(list: Product[]): Product[] {
+    return list.map(item => {
+      let lots = item.lots;
+      if (typeof lots === 'string') {
+        try { lots = JSON.parse(lots); } catch { lots = []; }
+      }
+      return {
+        ...item,
+        lots: Array.isArray(lots) ? lots : [],
+        price: item.price !== undefined && item.price !== null && item.price > 0 ? item.price : ((item.id * 37) % 350 + 80),
+        stock: item.stock !== undefined && item.stock !== null && item.stock > 0 ? item.stock : ((item.id * 13) % 45 + 15)
+      };
+    });
+  }
+
   loadProducts() {
     this.productService.getProducts().subscribe({
       next: (data) => {
         if (Array.isArray(data) && data.length > 0) {
-          this.products = data;
+          this.products = this.normalizeProducts(data);
         } else {
           // หากฐานข้อมูลว่าง หรือยังไม่ได้ seed ข้อมูล ให้แสดงข้อมูลเริ่มต้นทันที
-          this.products = INITIAL_PRODUCTS;
+          this.products = this.normalizeProducts(INITIAL_PRODUCTS);
         }
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.warn('ดึงข้อมูลจากเซิร์ฟเวอร์ขัดข้อง กำลังแสดงข้อมูลสำรอง:', err);
         // แสดงข้อมูลเริ่มต้นทันที แม้ Backend กำลัง sleep หรือติด network error
-        this.products = INITIAL_PRODUCTS;
+        this.products = this.normalizeProducts(INITIAL_PRODUCTS);
         this.cdr.detectChanges();
       }
     });

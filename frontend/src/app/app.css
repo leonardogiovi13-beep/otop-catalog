@@ -782,3 +782,356 @@
   color: var(--text-dark);
   font-weight: 600;
 }
+
+/* ==============================================================
+   4. ตะกร้าสินค้า และปุ่มบน Navbar / Card
+   ============================================================== */
+.btn-cart-nav {
+  position: relative;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  color: var(--primary-dark);
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-cart-nav:hover {
+  background: #ffffff;
+  border-color: #d8a45e;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.cart-badge-count {
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* ราคาและสต็อกบนการ์ดสินค้า */
+.card-price-stock {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.card-price .price-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #059669; /* เขียวสดใส */
+}
+
+.card-stock {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.card-stock.out-of-stock {
+  color: #ef4444;
+  background: #fee2e2;
+  font-weight: 600;
+}
+
+.card-bottom-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-add-cart-card {
+  flex: 1;
+  background: var(--primary-dark);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-add-cart-card:hover:not(:disabled) {
+  background: #0f172a;
+  transform: translateY(-1px);
+}
+
+.btn-add-cart-card:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.admin-actions-inline {
+  display: flex;
+  gap: 6px;
+}
+
+.price-highlight {
+  color: #059669;
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.stock-highlight {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+/* ==============================================================
+   5. Cart Modal Popup
+   ============================================================== */
+.cart-modal-box {
+  max-width: 680px;
+  max-height: 85vh;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-modal-header h2 {
+  font-size: 1.6rem;
+  color: var(--primary-dark);
+}
+
+.cart-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.cart-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 12px;
+}
+
+.cart-empty-state h3 {
+  color: var(--primary-dark);
+  margin-bottom: 6px;
+}
+
+.cart-empty-state p {
+  color: var(--text-light);
+}
+
+.cart-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 15px;
+}
+
+.cart-items-scroll {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cart-item-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.cart-item-img {
+  width: 65px;
+  height: 65px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cart-item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-item-details {
+  flex: 1;
+  text-align: left;
+}
+
+.cart-item-title {
+  font-size: 0.95rem;
+  color: var(--primary-dark);
+  margin-bottom: 2px;
+}
+
+.cart-item-location {
+  font-size: 0.78rem;
+  color: var(--text-light);
+}
+
+.cart-item-unit-price {
+  font-size: 0.82rem;
+  color: #059669;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.cart-item-qty-control {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.btn-qty-step {
+  background: #f1f5f9;
+  border: none;
+  width: 28px;
+  height: 32px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--primary-dark);
+  transition: background 0.15s;
+}
+
+.btn-qty-step:hover {
+  background: #e2e8f0;
+}
+
+.qty-input {
+  width: 48px;
+  height: 32px;
+  border: none;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.cart-item-subtotal {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  min-width: 80px;
+  text-align: right;
+}
+
+.btn-cart-remove-item {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: transform 0.15s;
+}
+
+.btn-cart-remove-item:hover {
+  transform: scale(1.2);
+}
+
+.cart-footer-summary {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 2px solid #e2e8f0;
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+}
+
+.cart-total-row.final-total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-top: 10px;
+}
+
+.cart-total-row .total-price {
+  color: #059669;
+}
+
+.cart-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-checkout {
+  background: #059669;
+}
+
+.btn-checkout:hover {
+  background: #047857;
+}
+
+/* ==============================================================
+   6. Order Success Modal Popup
+   ============================================================== */
+.order-success-box {
+  max-width: 460px;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.order-success-icon {
+  font-size: 4.5rem;
+  margin-bottom: 12px;
+  animation: bounce 0.6s ease;
+}
+
+.order-success-box h2 {
+  font-size: 1.8rem;
+  color: #059669;
+  margin-bottom: 6px;
+}
+
+.order-success-msg {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+}
+
+.order-success-submsg {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}

@@ -18,6 +18,12 @@
           <input type="text" [(ngModel)]="searchTerm" placeholder="ค้นหา">
           <span class="search-icon">🔍</span>
         </div>
+
+        <!-- 🛒 ปุ่มแท็บตะกร้าสินค้า -->
+        <button class="btn-cart-nav" (click)="openCart()" title="ดูตะกร้าสินค้า">
+          🛒 <span class="cart-label">ตะกร้า</span>
+          <span class="cart-badge-count" *ngIf="cartTotalCount > 0">{{ cartTotalCount }}</span>
+        </button>
         
         <!-- กรณีที่ยังไม่ได้เข้าสู่ระบบ -->
         <ng-container *ngIf="!isLoggedIn">
@@ -93,11 +99,31 @@
               <span class="dot"></span>
               จ.{{ product.province }}<span *ngIf="product.district"> อ.{{ product.district }}</span><span *ngIf="product.subDistrict"> ต.{{ product.subDistrict }}</span>
             </div>
-            
-            <!-- ปุ่มจัดการของ Admin -->
-            <div class="admin-actions" *ngIf="isAdmin" (click)="$event.stopPropagation()">
-              <button class="btn-edit" (click)="openEditForm(product)">✏️</button>
-              <button class="btn-delete" (click)="deleteProduct(product.id)">🗑️</button>
+
+            <!-- แสดงราคาและจำนวนสินค้า -->
+            <div class="card-price-stock">
+              <div class="card-price">
+                <span class="price-val">฿{{ getProductPrice(product) | number }}</span>
+              </div>
+              <div class="card-stock" [class.out-of-stock]="getProductStock(product) <= 0">
+                <span>{{ getProductStock(product) > 0 ? ('คงเหลือ ' + (getProductStock(product) | number) + ' ชิ้น') : 'สินค้าหมด' }}</span>
+              </div>
+            </div>
+
+            <!-- ปุ่มเพิ่มลงตะกร้าสำหรับผู้ใช้งานทั่วไป -->
+            <div class="card-bottom-actions">
+              <button 
+                class="btn-add-cart-card" 
+                (click)="addToCart(product, $event)"
+                [disabled]="getProductStock(product) <= 0">
+                🛒 เพิ่มลงตะกร้า
+              </button>
+
+              <!-- ปุ่มจัดการของ Admin -->
+              <div class="admin-actions-inline" *ngIf="isAdmin" (click)="$event.stopPropagation()">
+                <button class="btn-edit" (click)="openEditForm(product)" title="แก้ไข">✏️</button>
+                <button class="btn-delete" (click)="deleteProduct(product.id)" title="ลบ">🗑️</button>
+              </div>
             </div>
           </div>
 
@@ -134,13 +160,15 @@
         <ul class="meta-list">
           <li><strong>หมวดหมู่:</strong> {{ selectedProduct.category }}</li>
           <li><strong>ที่อยู่/แหล่งผลิต:</strong> จ.{{ selectedProduct.province }}<span *ngIf="selectedProduct.district"> อ.{{ selectedProduct.district }}</span><span *ngIf="selectedProduct.subDistrict"> ต.{{ selectedProduct.subDistrict }}</span></li>
+          <li><strong>ราคา:</strong> <span class="price-highlight">฿{{ getProductPrice(selectedProduct) | number }}</span></li>
+          <li><strong>จำนวนคงเหลือ:</strong> <span class="stock-highlight">{{ getProductStock(selectedProduct) | number }} ชิ้น</span></li>
           <li><strong>ผู้ผลิต:</strong> {{ selectedProduct.producerName || '-' }}</li>
           <li><strong>ติดต่อ:</strong> <span class="phone">{{ selectedProduct.phone || '-' }}</span></li>
         </ul>
 
-        <!-- รายการล็อตสินค้า (ถ้ามี) -->
-        <div *ngIf="selectedProduct.lots && selectedProduct.lots.length > 0" style="margin-top: 20px;">
-          <h4 style="color: var(--primary-dark); margin-bottom: 8px;">📦 ข้อมูลล็อตสินค้า</h4>
+        <!-- 🛡️ สำหรับโหมดแอดมิน: จะเห็นทุกล็อตสินค้า -->
+        <div *ngIf="isAdmin && selectedProduct.lots && selectedProduct.lots.length > 0" style="margin-top: 20px;">
+          <h4 style="color: var(--primary-dark); margin-bottom: 8px;">📦 ข้อมูลทุกล็อตสินค้า (เฉพาะผู้ดูแลระบบ)</h4>
           <table class="modal-lots-table">
             <thead>
               <tr>
@@ -157,6 +185,16 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- ปุ่มเพิ่มลงตะกร้าใน Modal -->
+        <div class="mt-4">
+          <button 
+            class="btn-dark-pill w-100" 
+            (click)="addToCart(selectedProduct); closeModal()"
+            [disabled]="getProductStock(selectedProduct) <= 0">
+            🛒 เพิ่มสินค้านี้ลงในตะกร้า
+          </button>
         </div>
       </div>
     </div>
@@ -394,5 +432,102 @@
 
       <button class="btn-dark-pill mt-4" style="width: 100%;" (click)="closeAboutModal()">เข้าใจแล้ว</button>
     </div>
+  </div>
+</div>
+
+<!-- ================= Modal: ตะกร้าสินค้า (Cart Modal) ================= -->
+<div class="modal-backdrop" *ngIf="showCartModal" (click)="closeCart()">
+  <div class="modal-box cart-modal-box" (click)="$event.stopPropagation()">
+    <button class="btn-close" (click)="closeCart()">✖</button>
+    
+    <div class="cart-modal-header">
+      <h2>🛒 ตะกร้าสินค้าของคุณ</h2>
+      <p class="modal-subtitle">รายการสินค้าที่คุณเลือกไว้ พร้อมสั่งซื้อ</p>
+    </div>
+
+    <!-- กรณีไม่มีสินค้าในตะกร้า -->
+    <div class="cart-empty-state" *ngIf="cartItems.length === 0">
+      <div class="cart-empty-icon">🛍️</div>
+      <h3>ยังไม่มีสินค้าในตะกร้า</h3>
+      <p>เลือกดูสินค้าของดีแดนใต้แล้วกด "เพิ่มลงตะกร้า" ได้เลยครับ</p>
+      <button class="btn-dark-pill mt-3" (click)="closeCart()">กลับไปเลือกสินค้า</button>
+    </div>
+
+    <!-- กรณีมีสินค้าในตะกร้า -->
+    <div class="cart-content-wrapper" *ngIf="cartItems.length > 0">
+      <div class="cart-items-scroll">
+        <div class="cart-item-card" *ngFor="let item of cartItems">
+          <!-- รูปภาพสินค้า -->
+          <div class="cart-item-img">
+            <img [src]="item.product.imageUrl || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80'" [alt]="item.product.name">
+          </div>
+
+          <!-- รายละเอียดสินค้า -->
+          <div class="cart-item-details">
+            <h4 class="cart-item-title">{{ item.product.name }}</h4>
+            <div class="cart-item-location">
+              จ.{{ item.product.province }}<span *ngIf="item.product.district"> อ.{{ item.product.district }}</span>
+            </div>
+            <div class="cart-item-unit-price">
+              ราคา: ฿{{ getProductPrice(item.product) | number }} / ชิ้น
+            </div>
+          </div>
+
+          <!-- จัดการจำนวนสินค้า (กดเพิ่ม/ลด หรือพิมพ์กรอกตัวเลขได้) -->
+          <div class="cart-item-qty-control">
+            <button class="btn-qty-step" (click)="decreaseCartQuantity(item)" title="ลดจำนวน">-</button>
+            <input 
+              type="number" 
+              class="qty-input" 
+              [(ngModel)]="item.quantity" 
+              (change)="onQuantityChange(item)" 
+              min="1" 
+              [max]="getProductStock(item.product)">
+            <button class="btn-qty-step" (click)="increaseCartQuantity(item)" title="เพิ่มจำนวน">+</button>
+          </div>
+
+          <!-- ราคารวมของรายการนี้ -->
+          <div class="cart-item-subtotal">
+            ฿{{ (getProductPrice(item.product) * item.quantity) | number }}
+          </div>
+
+          <!-- ปุ่มลบรายการนี้ -->
+          <button class="btn-cart-remove-item" (click)="removeCartItem(item)" title="ลบรายการนี้">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <!-- สรุปยอดรวมและปุ่มสั่งซื้อ -->
+      <div class="cart-footer-summary">
+        <div class="cart-total-row">
+          <span class="total-label">จำนวนสินค้าทั้งหมด:</span>
+          <span class="total-value">{{ cartTotalCount | number }} ชิ้น</span>
+        </div>
+        <div class="cart-total-row final-total">
+          <span class="total-label">ยอดชำระสุทธิ:</span>
+          <span class="total-price">฿{{ cartTotalPrice | number }}</span>
+        </div>
+
+        <div class="cart-footer-actions">
+          <button class="btn-outline-pill" (click)="closeCart()">เลือกสินค้าต่อ</button>
+          <button class="btn-dark-pill btn-checkout" (click)="checkout()">
+            🛍️ ยืนยันการสั่งซื้อ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Modal: แจ้งเตือนสั่งซื้อสำเร็จ ================= -->
+<div class="modal-backdrop" *ngIf="showOrderSuccessModal" (click)="closeOrderSuccessModal()">
+  <div class="modal-box order-success-box" (click)="$event.stopPropagation()">
+    <button class="btn-close" (click)="closeOrderSuccessModal()">✖</button>
+    <div class="order-success-icon">🎉</div>
+    <h2>สั่งซื้อสำเร็จ</h2>
+    <p class="order-success-msg">ขอบคุณที่ทดลองใช้เว็บของเรา</p>
+    <p class="order-success-submsg">เราได้รับคำสั่งซื้อของคุณเรียบร้อยแล้ว สินค้าชุมชนของดีแดนใต้พร้อมจัดส่งถึงมือคุณ</p>
+    <button class="btn-dark-pill mt-4 w-100" (click)="closeOrderSuccessModal()">ตกลง</button>
   </div>
 </div>

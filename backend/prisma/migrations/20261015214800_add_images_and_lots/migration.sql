@@ -1,3 +1,4 @@
 -- AlterTable
 ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "images" TEXT,
 ADD COLUMN IF NOT EXISTS "lots" TEXT;
+

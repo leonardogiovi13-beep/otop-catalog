@@ -5,6 +5,11 @@ export interface ProductLot {
   stock: number;     // จำนวนสินค้า
 }
 
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
 export interface Product {
   id: number;
   name: string;
