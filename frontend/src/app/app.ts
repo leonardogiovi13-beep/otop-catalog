@@ -449,19 +449,18 @@ export class App implements OnInit {
   get filteredProducts(): Product[] {
     return this.products.filter(product => {
       const matchCategory = this.selectedCategory === 'ทั้งหมด' || product.category === this.selectedCategory;
-      const matchZone = this.selectedZone === 'ทั้งหมด' || product.zone === this.selectedZone;
+      
       const safeName = product.name || '';
       const safeProducer = product.producerName || '';
       
       const matchSearch = safeName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
                           safeProducer.toLowerCase().includes(this.searchTerm.toLowerCase());
-      return matchCategory && matchZone && matchSearch;
+      return matchCategory && matchSearch;
     });
   }
 
   selectCategory(category: string) { this.selectedCategory = category; }
-  selectZone(zone: string) { this.selectedZone = zone; }
   openModal(product: Product) { this.selectedProduct = product; }
   closeModal() { this.selectedProduct = null; }
-  resetFilters() { this.selectedCategory = 'ทั้งหมด'; this.selectedZone = 'ทั้งหมด'; this.searchTerm = ''; }
+  resetFilters() { this.selectedCategory = 'ทั้งหมด'; this.searchTerm = ''; }
 }
