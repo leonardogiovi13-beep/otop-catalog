@@ -14,7 +14,6 @@ export interface Product {
   isFeatured: boolean;
   isLatest: boolean;
   createdAt?: string;
-}  
 }
 
 export interface CommunityProducer {

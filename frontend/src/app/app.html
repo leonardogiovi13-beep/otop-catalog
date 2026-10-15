@@ -10,10 +10,7 @@
       </div>
 
       <div class="nav-menu">
-        <a href="#" (click)="$event.preventDefault(); resetFilters()" [class.active]="selectedZone === 'ทั้งหมด'">หน้าแรก</a>
-        <a href="#" (click)="$event.preventDefault(); selectZone('อ่าวไทย')" [class.active]="selectedZone === 'อ่าวไทย'">ฝั่งอ่าวไทย</a>
-        <a href="#" (click)="$event.preventDefault(); selectZone('อันดามัน')" [class.active]="selectedZone === 'อันดามัน'">ฝั่งอันดามัน</a>
-        <a href="#" (click)="$event.preventDefault(); selectZone('ชายแดนใต้')" [class.active]="selectedZone === 'ชายแดนใต้'">ชายแดนใต้</a>
+        <a href="#" (click)="$event.preventDefault(); resetFilters()" class="active">หน้าแรก</a>
       </div>
 
       <div class="nav-actions">
@@ -122,7 +119,6 @@
         <img [src]="selectedProduct.imageUrl || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&q=80'">
       </div>
       <div class="modal-data">
-        <span class="zone-badge">{{ selectedProduct.zone }}</span>
         <h2>{{ selectedProduct.name }}</h2>
         <p class="description">{{ selectedProduct.description }}</p>
         <ul class="meta-list">

@@ -306,8 +306,9 @@ export class App implements OnInit {
     this.productForm = {
       name: '', 
       category: 'อาหาร', 
-      zone: 'อ่าวไทย', 
       province: '',
+      district: '',
+      subDistrict: '',
       description: '', 
       producerName: '', 
       phone: '', 
