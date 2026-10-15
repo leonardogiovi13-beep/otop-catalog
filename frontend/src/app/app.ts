@@ -331,6 +331,8 @@ export class App implements OnInit {
       producerName: '', 
       phone: '', 
       imageUrl: '',
+      images: [],
+      lots: [],
       isFeatured: false, 
       isLatest: true
     };
@@ -340,7 +342,16 @@ export class App implements OnInit {
   openEditForm(product: Product) {
     this.isEditing = true;
     this.editingId = product.id;
-    this.productForm = { ...product }; 
+    const images = Array.isArray(product.images) && product.images.length > 0
+      ? [...product.images]
+      : (product.imageUrl ? [product.imageUrl] : []);
+    const lots = Array.isArray(product.lots) ? JSON.parse(JSON.stringify(product.lots)) : [];
+    this.productForm = {
+      ...product,
+      images,
+      lots,
+      imageUrl: product.imageUrl || (images.length > 0 ? images[0] : '')
+    }; 
     this.showFormModal = true;
   }
 
@@ -352,7 +363,7 @@ export class App implements OnInit {
   }
 
   // ==============================================================
-  // 📸 ฟังก์ชันอัปโหลดรูปภาพผ่าน Cloudinary
+  // 📸 ฟังก์ชันอัปโหลดรูปภาพผ่าน Cloudinary (รองรับ Drag & Drop หลายรูป)
   // ==============================================================
   isDragging: boolean = false;
 
@@ -371,15 +382,15 @@ export class App implements OnInit {
     this.isDragging = false;
     
     if (event.dataTransfer && event.dataTransfer.files.length > 0) {
-      const file = event.dataTransfer.files[0];
-      this.uploadFile(file);
+      const files = Array.from(event.dataTransfer.files);
+      files.forEach(file => this.uploadFile(file));
     }
   }
 
   onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.uploadFile(file);
+    const files = event.target.files ? Array.from(event.target.files) as File[] : [];
+    if (files.length > 0) {
+      files.forEach(file => this.uploadFile(file));
     }
   }
 
@@ -394,8 +405,17 @@ export class App implements OnInit {
 
     this.http.post(url, formData).subscribe({
       next: (response: any) => {
-        this.productForm.imageUrl = response.secure_url; 
+        const uploadedUrl = response.secure_url;
+        if (!this.productForm.images) {
+          this.productForm.images = [];
+        }
+        this.productForm.images.push(uploadedUrl);
+        // ถ้ารูปหลักยังไม่มี ให้รูปแรกที่อัปโหลดเป็นรูปหลัก
+        if (!this.productForm.imageUrl) {
+          this.productForm.imageUrl = uploadedUrl;
+        }
         this.isUploading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Upload Error:', err);
@@ -405,10 +425,41 @@ export class App implements OnInit {
     });
   }
 
-  removeImage(event: Event) {
+  removeImageAt(index: number, event: Event) {
     event.preventDefault(); 
     event.stopPropagation(); 
-    this.productForm.imageUrl = '';
+    if (this.productForm.images && this.productForm.images.length > index) {
+      this.productForm.images.splice(index, 1);
+      // ตั้งรูปหลักใหม่เป็นรูปแรกที่เหลือ
+      this.productForm.imageUrl = this.productForm.images.length > 0 ? this.productForm.images[0] : '';
+    }
+  }
+
+  setMainImage(index: number) {
+    if (this.productForm.images && this.productForm.images[index]) {
+      this.productForm.imageUrl = this.productForm.images[index];
+    }
+  }
+
+  // ==============================================================
+  // 📦 จัดการล็อตสินค้า (Lots)
+  // ==============================================================
+  addLot() {
+    if (!this.productForm.lots) {
+      this.productForm.lots = [];
+    }
+    const nextNumber = this.productForm.lots.length + 1;
+    this.productForm.lots.push({
+      lotNumber: `ล็อตที่ ${nextNumber}`,
+      price: 0,
+      stock: 0
+    });
+  }
+
+  removeLot(index: number) {
+    if (this.productForm.lots && this.productForm.lots.length > index) {
+      this.productForm.lots.splice(index, 1);
+    }
   }
 
   saveProduct() {
@@ -417,8 +468,29 @@ export class App implements OnInit {
       return;
     }
 
+    // ตรวจสอบล็อตสินค้า: ไม่บังคับใส่ แต่ถ้ามีล็อต ต้องกรอกราคาและจำนวนสินค้า
+    if (this.productForm.lots && this.productForm.lots.length > 0) {
+      for (let i = 0; i < this.productForm.lots.length; i++) {
+        const lot = this.productForm.lots[i];
+        const lotName = lot.lotNumber || `ล็อตที่ ${i + 1}`;
+        if (lot.price === undefined || lot.price === null || lot.price < 0 || isNaN(Number(lot.price))) {
+          alert(`⚠️ กรุณากรอกราคาของ "${lotName}" ให้ถูกต้อง (ต้องเป็นตัวเลขมากกว่าหรือเท่ากับ 0)`);
+          return;
+        }
+        if (lot.stock === undefined || lot.stock === null || lot.stock < 0 || isNaN(Number(lot.stock))) {
+          alert(`⚠️ กรุณากรอกจำนวนสินค้าของ "${lotName}" ให้ถูกต้อง (ต้องเป็นตัวเลขมากกว่าหรือเท่ากับ 0)`);
+          return;
+        }
+      }
+    }
+
     const { id, price, stock, ...restForm } = this.productForm;
     
+    // หากมีภาพแรกใน images และ imageUrl ยังว่าง ให้ใช้ภาพแรก
+    if (!restForm.imageUrl && restForm.images && restForm.images.length > 0) {
+      restForm.imageUrl = restForm.images[0];
+    }
+
     const payload = {
       ...restForm,
       price: price !== undefined && price !== null ? Number(price) : 0,

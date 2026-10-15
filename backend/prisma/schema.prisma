@@ -21,7 +21,9 @@ model Product {
   description  String?
   producerName String?  // ผู้ผลิต
   phone        String?  // เบอร์โทร
-  imageUrl     String?  // ลิงก์รูปภาพ
+  imageUrl     String?  // ลิงก์รูปภาพหลัก
+  images       String?  // รูปภาพทั้งหมด (JSON string array)
+  lots         String?  // ล็อตสินค้าทั้งหมด (JSON string array)
   price        Int      @default(0) // ราคา (บาท) ต้อง > 0 ตอนบันทึกผ่านระบบ
   stock        Int      @default(0) // จำนวนสต๊อก ต้อง >= 0
   isFeatured   Boolean  @default(false)

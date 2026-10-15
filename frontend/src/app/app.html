@@ -117,7 +117,16 @@
     <button class="btn-close" (click)="closeModal()">✖</button>
     <div class="modal-layout">
       <div class="modal-pic">
-        <img [src]="selectedProduct.imageUrl || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&q=80'">
+        <img [src]="selectedProduct.imageUrl || (selectedProduct.images && selectedProduct.images.length > 0 ? selectedProduct.images[0] : 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&q=80')">
+        <!-- แกลเลอรีรูปภาพเพิ่มเติม -->
+        <div class="modal-gallery-thumbs" *ngIf="selectedProduct.images && selectedProduct.images.length > 1">
+          <img 
+            *ngFor="let img of selectedProduct.images" 
+            [src]="img" 
+            class="modal-gallery-thumb"
+            [class.active]="selectedProduct.imageUrl === img"
+            (click)="selectedProduct.imageUrl = img">
+        </div>
       </div>
       <div class="modal-data">
         <h2>{{ selectedProduct.name }}</h2>
@@ -128,6 +137,27 @@
           <li><strong>ผู้ผลิต:</strong> {{ selectedProduct.producerName || '-' }}</li>
           <li><strong>ติดต่อ:</strong> <span class="phone">{{ selectedProduct.phone || '-' }}</span></li>
         </ul>
+
+        <!-- รายการล็อตสินค้า (ถ้ามี) -->
+        <div *ngIf="selectedProduct.lots && selectedProduct.lots.length > 0" style="margin-top: 20px;">
+          <h4 style="color: var(--primary-dark); margin-bottom: 8px;">📦 ข้อมูลล็อตสินค้า</h4>
+          <table class="modal-lots-table">
+            <thead>
+              <tr>
+                <th>ล็อต</th>
+                <th>ราคา</th>
+                <th>จำนวนคงเหลือ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let lot of selectedProduct.lots">
+                <td><strong>{{ lot.lotNumber }}</strong></td>
+                <td style="color: #059669; font-weight: 600;">{{ lot.price | number }} บาท</td>
+                <td>{{ lot.stock | number }} ชิ้น</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -179,11 +209,11 @@
 
     <div class="form-grid-2col">
       <div class="form-group text-left">
-        <label>ชื่อผู้ใช้ (Username) *</label>
+        <label>ชื่อผู้ใช้ (Username) <span class="required-star">*</span></label>
         <input type="text" [(ngModel)]="registerForm.username" placeholder="อย่างน้อย 3 ตัวอักษร">
       </div>
       <div class="form-group text-left">
-        <label>อีเมล (Email) *</label>
+        <label>อีเมล (Email) <span class="required-star">*</span></label>
         <input type="email" [(ngModel)]="registerForm.email" placeholder="example@domain.com">
       </div>
       <div class="form-group text-left">
@@ -195,11 +225,11 @@
         <input type="tel" [(ngModel)]="registerForm.phone" placeholder="เช่น 0812345678">
       </div>
       <div class="form-group text-left">
-        <label>รหัสผ่าน (Password) *</label>
+        <label>รหัสผ่าน (Password) <span class="required-star">*</span></label>
         <input type="password" [(ngModel)]="registerForm.password" placeholder="อย่างน้อย 6 ตัวอักษร">
       </div>
       <div class="form-group text-left">
-        <label>ยืนยันรหัสผ่าน *</label>
+        <label>ยืนยันรหัสผ่าน <span class="required-star">*</span></label>
         <input type="password" [(ngModel)]="registerForm.confirmPassword" placeholder="กรอกรหัสผ่านอีกครั้ง" (keyup.enter)="register()">
       </div>
     </div>
@@ -217,25 +247,29 @@
 
 <!-- ================= Modal: ฟอร์มเพิ่ม/แก้ไข ================= -->
 <div class="modal-backdrop" *ngIf="showFormModal" (click)="closeForm()">
-  <div class="modal-box form-box" (click)="$event.stopPropagation()">
+  <div class="modal-box form-box" style="max-width: 720px; max-height: 90vh; overflow-y: auto;" (click)="$event.stopPropagation()">
     <h2>{{ isEditing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่' }}</h2>
     <div class="form-grid">
-      <div class="form-group"><label>ชื่อสินค้า *</label><input type="text" [(ngModel)]="productForm.name"></div>
-      <div class="form-group"><label>จังหวัด *</label>
+      <div class="form-group">
+        <label>ชื่อสินค้า <span class="required-star">*</span></label>
+        <input type="text" [(ngModel)]="productForm.name">
+      </div>
+      <div class="form-group">
+        <label>จังหวัด <span class="required-star">*</span></label>
         <select [(ngModel)]="productForm.province" (change)="onProvinceChange()" class="form-input">
           <option value="" disabled selected>-- เลือกจังหวัด --</option>
           <option *ngFor="let p of southernProvinces" [value]="p">{{ p }}</option>
         </select>
       </div>
       <div class="form-group">
-        <label>อำเภอ *</label>
+        <label>อำเภอ <span class="required-star">*</span></label>
         <select [(ngModel)]="productForm.district" (change)="onDistrictChange()" class="form-input" [disabled]="!productForm.province">
           <option value="" disabled selected>-- เลือกอำเภอ --</option>
           <option *ngFor="let d of getAvailableDistricts(productForm.province)" [value]="d">{{ d }}</option>
         </select>
       </div>
       <div class="form-group">
-        <label>ตำบล *</label>
+        <label>ตำบล <span class="required-star">*</span></label>
         <select [(ngModel)]="productForm.subDistrict" class="form-input" [disabled]="!productForm.district">
           <option value="" disabled selected>-- เลือกตำบล --</option>
           <option *ngFor="let s of getAvailableSubDistricts(productForm.province, productForm.district)" [value]="s">{{ s }}</option>
@@ -250,8 +284,77 @@
       <div class="form-group"><label>ผู้ผลิต</label><input type="text" [(ngModel)]="productForm.producerName"></div>
       <div class="form-group"><label>เบอร์โทร</label><input type="text" [(ngModel)]="productForm.phone"></div>
     </div>
-    <div class="form-group mt-3"><label>รายละเอียด</label><textarea [(ngModel)]="productForm.description" rows="2"></textarea></div>
-    <div class="form-group"><label>URL รูปภาพ</label><input type="text" [(ngModel)]="productForm.imageUrl"></div>
+    
+    <div class="form-group mt-3">
+      <label>รายละเอียด</label>
+      <textarea [(ngModel)]="productForm.description" rows="2"></textarea>
+    </div>
+
+    <!-- 📸 กล่อง Drag & Drop อัปโหลดรูปภาพ (มีได้หลายภาพ ทั้งโหมดแก้ไขและเพิ่ม) -->
+    <div class="form-group mt-3">
+      <label>รูปภาพสินค้า (อัปโหลดได้หลายภาพ)</label>
+      <div 
+        class="upload-drop-zone"
+        [class.dragging]="isDragging"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()">
+        <input #fileInput type="file" multiple accept="image/*" style="display: none;" (change)="onFileSelected($event)">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">ลากไฟล์รูปภาพมาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
+        <div class="upload-subtext">รองรับการอัปโหลดพร้อมกันหลายไฟล์ (JPG, PNG, WebP)</div>
+        <div class="spinner mt-2" *ngIf="isUploading"></div>
+      </div>
+
+      <!-- รายการพรีวิวรูปภาพทั้งหมดที่อัปโหลด -->
+      <div class="multi-image-preview-grid" *ngIf="productForm.images && productForm.images.length > 0">
+        <div 
+          class="image-preview-card"
+          *ngFor="let img of productForm.images; let i = index"
+          [class.is-main]="productForm.imageUrl === img"
+          (click)="setMainImage(i)"
+          title="คลิกเพื่อตั้งเป็นภาพหลัก">
+          <img [src]="img" alt="Product image">
+          <span class="main-image-tag" *ngIf="productForm.imageUrl === img">ภาพหลัก</span>
+          <button class="btn-remove-thumb" (click)="removeImageAt(i, $event)" title="ลบภาพนี้">✕</button>
+        </div>
+      </div>
+      
+      <div class="mt-2" *ngIf="!productForm.images || productForm.images.length === 0">
+        <input type="text" [(ngModel)]="productForm.imageUrl" placeholder="หรือวางลิงก์ URL รูปภาพที่นี่" class="form-input">
+      </div>
+    </div>
+
+    <!-- 📦 ล็อตสินค้า (Lots): เพิ่มได้หลายล็อต (ไม่บังคับใส่ แต่ถ้าใส่ต้องกรอกราคาและจำนวน) -->
+    <div class="lots-section">
+      <div class="lots-header">
+        <div class="lots-title">📦 จัดการล็อตสินค้า (ไม่บังคับ)</div>
+        <button type="button" class="btn-add-lot" (click)="addLot()">➕ เพิ่มล็อตสินค้า</button>
+      </div>
+
+      <div class="lots-empty" *ngIf="!productForm.lots || productForm.lots.length === 0">
+        ยังไม่มีล็อตสินค้า (กดปุ่ม "เพิ่มล็อตสินค้า" หากต้องการกำหนดราคาและสต็อกรายล็อต)
+      </div>
+
+      <div class="lot-list" *ngIf="productForm.lots && productForm.lots.length > 0">
+        <div class="lot-row" *ngFor="let lot of productForm.lots; let i = index">
+          <div>
+            <input type="text" [(ngModel)]="lot.lotNumber" placeholder="ชื่อล็อต เช่น ล็อตที่ 1">
+          </div>
+          <div>
+            <input type="number" [(ngModel)]="lot.price" placeholder="ราคา (บาท) *" min="0">
+          </div>
+          <div>
+            <input type="number" [(ngModel)]="lot.stock" placeholder="จำนวนสินค้า *" min="0">
+          </div>
+          <div>
+            <button type="button" class="btn-delete-lot" (click)="removeLot(i)" title="ลบล็อตนี้">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="flex-between mt-4">
       <button class="btn-close-form" (click)="closeForm()">ยกเลิก</button>
       <button class="btn-dark-pill" (click)="saveProduct()">บันทึกข้อมูล</button>
