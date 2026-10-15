@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  name         String
+  category     String?  // หมวดหมู่
+  zone         String?  // ภูมิภาค
+  province     String?  // จังหวัด
+  description  String?
+  producerName String?  // ผู้ผลิต
+  phone        String?  // เบอร์โทร
+  imageUrl     String?  // ลิงก์รูปภาพ
+  price        Int      @default(0) // ราคา (บาท) ต้อง > 0 ตอนบันทึกผ่านระบบ
+  stock        Int      @default(0) // จำนวนสต๊อก ต้อง >= 0
+  isFeatured   Boolean  @default(false)
+  isLatest     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  fullName  String?
+  phone     String?
+  role      String   @default("USER") // 'USER' หรือ 'ADMIN'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

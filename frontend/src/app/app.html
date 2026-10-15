@@ -1,0 +1,290 @@
+<!-- พื้นหลังหลักของเว็บ -->
+<div class="app-background">
+  
+  <div class="main-wrapper">
+    <!-- ================= Navbar (แบบลอย) ================= -->
+    <nav class="floating-navbar">
+      <div class="nav-brand">
+       <img src="download.png" alt="OTOP" class="brand-logo">
+       <span class="subtitle">SOUTHERN THAILAND</span>
+      </div>
+
+      <div class="nav-menu">
+        <a href="#" (click)="$event.preventDefault(); resetFilters()" [class.active]="selectedZone === 'ทั้งหมด'">หน้าแรก</a>
+        <a href="#" (click)="$event.preventDefault(); selectZone('อ่าวไทย')" [class.active]="selectedZone === 'อ่าวไทย'">ฝั่งอ่าวไทย</a>
+        <a href="#" (click)="$event.preventDefault(); selectZone('อันดามัน')" [class.active]="selectedZone === 'อันดามัน'">ฝั่งอันดามัน</a>
+        <a href="#" (click)="$event.preventDefault(); selectZone('ชายแดนใต้')" [class.active]="selectedZone === 'ชายแดนใต้'">ชายแดนใต้</a>
+      </div>
+
+      <div class="nav-actions">
+        <div class="search-pill">
+          <input type="text" [(ngModel)]="searchTerm" placeholder="ค้นหา">
+          <span class="search-icon">🔍</span>
+        </div>
+        
+        <!-- กรณีที่ยังไม่ได้เข้าสู่ระบบ -->
+        <ng-container *ngIf="!isLoggedIn">
+          <button class="btn-outline-pill" (click)="openLogin()">เข้าสู่ระบบ</button>
+          <button class="btn-dark-pill" (click)="openRegister()">สมัครสมาชิก</button>
+        </ng-container>
+
+        <!-- กรณีที่เข้าสู่ระบบแล้ว -->
+        <ng-container *ngIf="isLoggedIn">
+          <div class="user-pill">
+            <span class="user-role-badge" [class.admin-badge]="isAdmin">
+              {{ isAdmin ? '🛡️ Admin' : '👤 สมาชิก' }}
+            </span>
+            <span class="user-name-text">{{ currentUser?.fullName || currentUser?.username }}</span>
+          </div>
+          <button class="btn-danger-pill" (click)="logout()">ออกจากระบบ</button>
+        </ng-container>
+      </div>
+    </nav>
+
+    <!-- ================= Hero Banner ================= -->
+    <header class="hero-banner">
+      <div class="hero-content">
+        <h1>เสน่ห์แดนใต้<br>ของดีจากชุมชน</h1>
+        <p>เสน่ห์แดนใต้ ของดีจากชุมชน เท่ไม่ซ้ำทุกๆ ภาค</p>
+        <button class="btn-explore" (click)="openAboutModal()">ที่มาของสินค้า OTOP</button>
+      </div>
+    </header>
+
+    <!-- ================= หมวดหมู่สินค้า ================= -->
+    <section class="section-container">
+      <h2 class="section-title">หมวดหมู่สินค้า</h2>
+      <div class="category-pills-wrapper">
+        <button 
+          class="cat-pill" 
+          *ngFor="let cat of categories"
+          [class.active]="selectedCategory === cat"
+          (click)="selectCategory(cat)">
+          <div class="cat-icon-wrapper">
+            <!-- ดึงรูปภาพให้ตรงกับหมวดหมู่เป๊ะๆ -->
+            <img src="https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=100&q=80" *ngIf="cat === 'ทั้งหมด'" alt="ทั้งหมด">
+            <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=100&q=80" *ngIf="cat === 'อาหาร'" alt="อาหาร">
+            <img src="https://images.unsplash.com/photo-1544145945-f90425340c7e?w=100&q=80" *ngIf="cat === 'เครื่องดื่ม'" alt="เครื่องดื่ม">
+            <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=100&q=80" *ngIf="cat === 'ผ้าและเครื่องแต่งกาย'" alt="ผ้า">
+            <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=100&q=80" *ngIf="cat === 'สมุนไพร/ของใช้'" alt="สมุนไพร">
+            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=100&q=80" *ngIf="cat === 'ของประดับตกแต่ง'" alt="ตกแต่ง">
+            <img src="https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=100&q=80" *ngIf="cat === 'ของใช้'" alt="ของใช้">
+          </div>
+          <span>{{ cat }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= สินค้าแนะนำ ================= -->
+    <section class="section-container">
+      <div class="flex-between">
+        <h2 class="section-title">สินค้าแนะนำ <span class="count">({{ filteredProducts.length }})</span></h2>
+        <button class="btn-dark-pill" *ngIf="isAdmin" (click)="openAddForm()" style="margin-bottom: 15px;">➕ เพิ่มสินค้า</button>
+      </div>
+
+      <div class="product-grid">
+        <!-- การ์ดสินค้า -->
+        <div class="prod-card" *ngFor="let product of filteredProducts" (click)="openModal(product)">
+          
+          <div class="card-img">
+            <img [src]="product.imageUrl || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&q=80'" alt="{{ product.name }}">
+          </div>
+
+          <div class="card-info">
+            <h3 class="prod-name">{{ product.name }}</h3>
+            
+            <div class="location-badge">
+              <span class="dot"></span> จังหวัด{{ product.province }}
+            </div>
+            <div class="prod-price" *ngIf="product.price">฿{{ product.price | number }}</div>
+            
+            <!-- ปุ่มจัดการของ Admin -->
+            <div class="admin-actions" *ngIf="isAdmin" (click)="$event.stopPropagation()">
+              <button class="btn-edit" (click)="openEditForm(product)">✏️</button>
+              <button class="btn-delete" (click)="deleteProduct(product.id)">🗑️</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="filteredProducts.length === 0">
+        <p>ไม่พบสินค้าที่ค้นหา</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ================= Modal: รายละเอียดสินค้า ================= -->
+<div class="modal-backdrop" *ngIf="selectedProduct" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <button class="btn-close" (click)="closeModal()">✖</button>
+    <div class="modal-layout">
+      <div class="modal-pic">
+        <img [src]="selectedProduct.imageUrl || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=500&q=80'">
+      </div>
+      <div class="modal-data">
+        <span class="zone-badge">{{ selectedProduct.zone }}</span>
+        <h2>{{ selectedProduct.name }}</h2>
+        <p class="description">{{ selectedProduct.description }}</p>
+        <ul class="meta-list">
+          <li><strong>หมวดหมู่:</strong> {{ selectedProduct.category }}</li>
+          <li><strong>จังหวัด:</strong> {{ selectedProduct.province }}</li>
+          <li *ngIf="selectedProduct.price"><strong>ราคา:</strong> ฿{{ selectedProduct.price | number }}</li>
+          <li *ngIf="selectedProduct.stock !== undefined"><strong>คงเหลือ:</strong> {{ selectedProduct.stock }} ชิ้น</li>
+          <li><strong>ผู้ผลิต:</strong> {{ selectedProduct.producerName || '-' }}</li>
+          <li><strong>ติดต่อ:</strong> <span class="phone">{{ selectedProduct.phone || '-' }}</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Modal: Login (เข้าสู่ระบบ) ================= -->
+<div class="modal-backdrop" *ngIf="showLoginModal" (click)="closeLogin()">
+  <div class="modal-box login-box" (click)="$event.stopPropagation()">
+    <button class="btn-close" (click)="closeLogin()">✖</button>
+    <h2>เข้าสู่ระบบ</h2>
+    <p class="modal-subtitle">เข้าสู่ระบบเพื่อใช้งานระบบ OTOP Catalog</p>
+
+    <!-- กล่องแจ้งเตือน Error -->
+    <div class="alert-box error" *ngIf="loginError">
+      {{ loginError }}
+    </div>
+
+    <div class="form-group text-left">
+      <label>ชื่อผู้ใช้ หรือ อีเมล</label>
+      <input type="text" [(ngModel)]="loginUser" placeholder="ระบุ username หรือ email" (keyup.enter)="login()">
+    </div>
+    <div class="form-group text-left">
+      <label>รหัสผ่าน</label>
+      <input type="password" [(ngModel)]="loginPass" placeholder="ระบุรหัสผ่าน" (keyup.enter)="login()">
+    </div>
+
+    <button class="btn-dark-pill w-100 mt-3" [disabled]="isLoggingIn" (click)="login()">
+      {{ isLoggingIn ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ' }}
+    </button>
+
+    <div class="auth-switch-text mt-3">
+      ยังไม่มีบัญชีใช่หรือไม่? 
+      <a href="#" (click)="$event.preventDefault(); switchToRegister()">สมัครสมาชิกที่นี่</a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Modal: Register (สมัครสมาชิกทั่วไป) ================= -->
+<div class="modal-backdrop" *ngIf="showRegisterModal" (click)="closeRegister()">
+  <div class="modal-box register-box" (click)="$event.stopPropagation()">
+    <button class="btn-close" (click)="closeRegister()">✖</button>
+    <h2>สมัครสมาชิก</h2>
+    <p class="modal-subtitle">สร้างบัญชีผู้ใช้งานใหม่ เพื่อเข้าถึงระบบ OTOP Catalog</p>
+
+    <!-- กล่องแจ้งเตือน Error -->
+    <div class="alert-box error" *ngIf="registerError">
+      {{ registerError }}
+    </div>
+
+    <div class="form-grid-2col">
+      <div class="form-group text-left">
+        <label>ชื่อผู้ใช้ (Username) *</label>
+        <input type="text" [(ngModel)]="registerForm.username" placeholder="อย่างน้อย 3 ตัวอักษร">
+      </div>
+      <div class="form-group text-left">
+        <label>อีเมล (Email) *</label>
+        <input type="email" [(ngModel)]="registerForm.email" placeholder="example@domain.com">
+      </div>
+      <div class="form-group text-left">
+        <label>ชื่อ-นามสกุล</label>
+        <input type="text" [(ngModel)]="registerForm.fullName" placeholder="เช่น สมชาย ใจดี">
+      </div>
+      <div class="form-group text-left">
+        <label>เบอร์โทรศัพท์</label>
+        <input type="tel" [(ngModel)]="registerForm.phone" placeholder="เช่น 0812345678">
+      </div>
+      <div class="form-group text-left">
+        <label>รหัสผ่าน (Password) *</label>
+        <input type="password" [(ngModel)]="registerForm.password" placeholder="อย่างน้อย 6 ตัวอักษร">
+      </div>
+      <div class="form-group text-left">
+        <label>ยืนยันรหัสผ่าน *</label>
+        <input type="password" [(ngModel)]="registerForm.confirmPassword" placeholder="กรอกรหัสผ่านอีกครั้ง" (keyup.enter)="register()">
+      </div>
+    </div>
+
+    <button class="btn-dark-pill w-100 mt-4" [disabled]="isRegistering" (click)="register()">
+      {{ isRegistering ? 'กำลังสมัครสมาชิก...' : 'ยืนยันการสมัครสมาชิก' }}
+    </button>
+
+    <div class="auth-switch-text mt-3">
+      มีบัญชีอยู่แล้วใช่หรือไม่? 
+      <a href="#" (click)="$event.preventDefault(); switchToLogin()">เข้าสู่ระบบที่นี่</a>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Modal: ฟอร์มเพิ่ม/แก้ไข ================= -->
+<div class="modal-backdrop" *ngIf="showFormModal" (click)="closeForm()">
+  <div class="modal-box form-box" (click)="$event.stopPropagation()">
+    <h2>{{ isEditing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่' }}</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>ชื่อสินค้า *</label><input type="text" [(ngModel)]="productForm.name"></div>
+      <div class="form-group"><label>จังหวัด *</label><input type="text" [(ngModel)]="productForm.province"></div>
+      <div class="form-group">
+        <label>หมวดหมู่</label>
+        <select [(ngModel)]="productForm.category" class="form-input">
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ภูมิภาค</label>
+        <select [(ngModel)]="productForm.zone" class="form-input">
+          <option *ngFor="let z of zones" [value]="z">{{ z }}</option>
+        </select>
+      </div>
+      <div class="form-group"><label>ราคา (บาท) *</label><input type="number" min="1" [(ngModel)]="productForm.price"></div>
+      <div class="form-group"><label>จำนวนสต๊อก *</label><input type="number" min="0" [(ngModel)]="productForm.stock"></div>
+      <div class="form-group"><label>ผู้ผลิต</label><input type="text" [(ngModel)]="productForm.producerName"></div>
+      <div class="form-group"><label>เบอร์โทร</label><input type="text" [(ngModel)]="productForm.phone"></div>
+    </div>
+    <div class="form-group mt-3"><label>รายละเอียด</label><textarea [(ngModel)]="productForm.description" rows="2"></textarea></div>
+    <div class="form-group"><label>URL รูปภาพ</label><input type="text" [(ngModel)]="productForm.imageUrl"></div>
+    <div class="flex-between mt-4">
+      <button class="btn-close-form" (click)="closeForm()">ยกเลิก</button>
+      <button class="btn-dark-pill" (click)="saveProduct()">บันทึกข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Modal: ที่มาและความสำคัญของสินค้า OTOP ================= -->
+<div class="modal-backdrop" *ngIf="showAboutModal" (click)="closeAboutModal()">
+  <div class="modal-box about-box" (click)="$event.stopPropagation()">
+    <button class="btn-close" (click)="closeAboutModal()">✖</button>
+    
+    <div class="about-content">
+      <h2>🌟 ที่มาและความสำคัญของสินค้า OTOP</h2>
+      <hr class="green-line" style="margin: 15px auto;">
+      
+      <p class="about-desc">
+        <strong>โครงการหนึ่งตำบล หนึ่งผลิตภัณฑ์ (OTOP)</strong> มีจุดเริ่มต้นจากการส่งเสริมภูมิปัญญาท้องถิ่น 
+        และการพัฒนาผลิตภัณฑ์โดยใช้วัตถุดิบที่มีอยู่ในชุมชนภาคใต้ มาแปรรูปและยกระดับมาตรฐานให้เป็นสินค้าที่มีคุณภาพ 
+        สร้างอาชีพ สร้างรายได้ และกระจายรายได้สู่ชุมชนอย่างยั่งยืน
+      </p>
+
+      <div class="about-highlights">
+        <div class="highlight-item">
+          <h4>🌿 ภูมิปัญญาพื้นบ้าน</h4>
+          <p>สืบสานและต่อยอดภูมิปัญญาท้องถิ่นจากรุ่นสู่รุ่น ผสมผสานนวัตกรรมสมัยใหม่</p>
+        </div>
+        <div class="highlight-item">
+          <h4>🤝 กระจายรายได้</h4>
+          <p>ส่งเสริมวิสาหกิจชุมชนและสร้างความเข้มแข็งให้กับเศรษฐกิจฐานราก</p>
+        </div>
+        <div class="highlight-item">
+          <h4>⭐ คุณภาพมาตรฐาน</h4>
+          <p>คัดสรรสินค้าโดดเด่นประจำจังหวัดภาคใต้ การันตีคุณภาพและความเป็นเอกลักษณ์</p>
+        </div>
+      </div>
+
+      <button class="btn-dark-pill mt-4" style="width: 100%;" (click)="closeAboutModal()">เข้าใจแล้ว</button>
+    </div>
+  </div>
+</div>
