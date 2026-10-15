@@ -16,6 +16,8 @@ model Product {
   category     String?  // หมวดหมู่
   zone         String?  // ภูมิภาค
   province     String?  // จังหวัด
+  district     String?  // อำเภอ
+  subDistrict  String?  // ตำบล
   description  String?
   producerName String?  // ผู้ผลิต
   phone        String?  // เบอร์โทร
