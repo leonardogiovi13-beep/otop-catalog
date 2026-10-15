@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from './services/product.service';
 import { Product, CommunityProducer, MOCK_PRODUCERS } from './mock-products'; 
+import { SOUTHERN_PROVINCES, DISTRICTS_BY_PROVINCE, SUB_DISTRICTS_BY_LOCATION } from './data/locations';
 
 @Component({
   selector: 'app-root',
@@ -20,25 +21,28 @@ export class App implements OnInit {
   searchTerm: string = '';
   selectedProduct: Product | null = null;
 
-  // Southern provinces and hierarchical location data
-  southernProvinces: string[] = ['สงขลา','ยะลา','นราธิวาส','ตรัง','พังงา','ภูเก็ต','สุราษฎร์ธานี','สตูล'];
+  // 14 Southern provinces and hierarchical location data
+  southernProvinces: string[] = SOUTHERN_PROVINCES;
+  districtsByProvince = DISTRICTS_BY_PROVINCE;
+  subDistrictsByLocation = SUB_DISTRICTS_BY_LOCATION;
 
-  districtsByProvince: { [province: string]: string[] } = {
-    'สงขลา': ['อัมพวา','หาดใหญ่'],
-    'ยะลา': ['ยะลาตอนเหนือ','ยะลาตอนใต้'],
-    'นราธิวาส': ['นราธิวาสเหนือ','นราธิวาสใต้'],
-    'ตรัง': ['อุโมงค์','เขาตะบง'],
-    'พังงา': ['อุทัยธานี','เกาะพงัน'],
-    'ภูเก็ต': ['เมืองภูเก็ต','ถลาง'],
-    'สุราษฎร์ธานี': ['อำเภอเมือง','อัมพวา'],
-    'สตูล': ['เมืองสตูล','อีสาน']
-  };
+  getAvailableDistricts(province: string): string[] {
+    return this.districtsByProvince[province] || [];
+  }
 
-  subDistrictsByDistrict: { [district: string]: string[] } = {
-    'อัมพวา': ['ตำบลหัวไชย','ตำบลถนนมอ'],
-    'หาดใหญ่': ['ตำบลศรีสว่าง','ตำบลหาดใหญ่']
-    // Additional mappings can be added as needed
-  };
+  getAvailableSubDistricts(province: string, district: string): string[] {
+    if (!province || !district) return [];
+    return this.subDistrictsByLocation[`${province}_${district}`] || [];
+  }
+
+  onProvinceChange() {
+    this.productForm.district = '';
+    this.productForm.subDistrict = '';
+  }
+
+  onDistrictChange() {
+    this.productForm.subDistrict = '';
+  }
 
   categories: string[] = ['ทั้งหมด', 'อาหาร', 'เครื่องดื่ม', 'ผ้าและเครื่องแต่งกาย', 'สมุนไพร/ของใช้', 'ของประดับตกแต่ง', 'ของใช้'];
 

@@ -90,7 +90,8 @@
             <h3 class="prod-name">{{ product.name }}</h3>
             
             <div class="location-badge">
-              <span class="dot"></span> จังหวัด{{ product.province }}
+              <span class="dot"></span>
+              จ.{{ product.province }}<span *ngIf="product.district"> อ.{{ product.district }}</span><span *ngIf="product.subDistrict"> ต.{{ product.subDistrict }}</span>
             </div>
             
             <!-- ปุ่มจัดการของ Admin -->
@@ -123,7 +124,7 @@
         <p class="description">{{ selectedProduct.description }}</p>
         <ul class="meta-list">
           <li><strong>หมวดหมู่:</strong> {{ selectedProduct.category }}</li>
-          <li><strong>จังหวัด:</strong> {{ selectedProduct.province }}</li>
+          <li><strong>ที่อยู่/แหล่งผลิต:</strong> จ.{{ selectedProduct.province }}<span *ngIf="selectedProduct.district"> อ.{{ selectedProduct.district }}</span><span *ngIf="selectedProduct.subDistrict"> ต.{{ selectedProduct.subDistrict }}</span></li>
           <li><strong>ผู้ผลิต:</strong> {{ selectedProduct.producerName || '-' }}</li>
           <li><strong>ติดต่อ:</strong> <span class="phone">{{ selectedProduct.phone || '-' }}</span></li>
         </ul>
@@ -221,20 +222,23 @@
     <div class="form-grid">
       <div class="form-group"><label>ชื่อสินค้า *</label><input type="text" [(ngModel)]="productForm.name"></div>
       <div class="form-group"><label>จังหวัด *</label>
-        <select [(ngModel)]="productForm.province" class="form-input">
+        <select [(ngModel)]="productForm.province" (change)="onProvinceChange()" class="form-input">
+          <option value="" disabled selected>-- เลือกจังหวัด --</option>
           <option *ngFor="let p of southernProvinces" [value]="p">{{ p }}</option>
         </select>
       </div>
       <div class="form-group">
         <label>อำเภอ *</label>
-        <select [(ngModel)]="productForm.district" class="form-input" [disabled]="!productForm.province">
-          <option *ngFor="let d of (districtsByProvince[productForm.province] || [])" [value]="d">{{ d }}</option>
+        <select [(ngModel)]="productForm.district" (change)="onDistrictChange()" class="form-input" [disabled]="!productForm.province">
+          <option value="" disabled selected>-- เลือกอำเภอ --</option>
+          <option *ngFor="let d of getAvailableDistricts(productForm.province)" [value]="d">{{ d }}</option>
         </select>
       </div>
       <div class="form-group">
         <label>ตำบล *</label>
         <select [(ngModel)]="productForm.subDistrict" class="form-input" [disabled]="!productForm.district">
-          <option *ngFor="let s of (subDistrictsByDistrict[productForm.district] || [])" [value]="s">{{ s }}</option>
+          <option value="" disabled selected>-- เลือกตำบล --</option>
+          <option *ngFor="let s of getAvailableSubDistricts(productForm.province, productForm.district)" [value]="s">{{ s }}</option>
         </select>
       </div>
       <div class="form-group">
