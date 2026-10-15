@@ -50,7 +50,12 @@
 }
 
 .nav-brand { display: flex; align-items: center; gap: 10px; }
-.brand-logo { height: 40px; }
+.brand-logo {
+  height: 42px;
+  width: 42px;
+  border-radius: 50%;
+  object-fit: contain;
+}
 .brand-text { display: flex; flex-direction: column; }
 .brand-text .title { font-weight: 700; color: #b48545; font-size: 1.1rem; line-height: 1; }
 .brand-text .subtitle { font-size: 0.65rem; color: var(--text-light); letter-spacing: 1px; }

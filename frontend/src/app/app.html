@@ -4,13 +4,16 @@
   <div class="main-wrapper">
     <!-- ================= Navbar (แบบลอย) ================= -->
     <nav class="floating-navbar">
-      <div class="nav-brand">
-       <img src="download.png" alt="OTOP" class="brand-logo">
-       <span class="subtitle">SOUTHERN THAILAND</span>
+      <div class="nav-brand" (click)="resetFilters()" style="cursor: pointer;">
+        <img src="otop-logo.svg" alt="OTOP" class="brand-logo">
+        <div class="brand-text">
+          <span class="title">OTOP</span>
+          <span class="subtitle">SOUTHERN THAILAND</span>
+        </div>
       </div>
 
       <div class="nav-menu">
-        <a href="#" (click)="$event.preventDefault(); resetFilters()" class="active">หน้าแรก</a>
+        <a href="#" (click)="$event.preventDefault(); resetFilters()" class="active">สินค้า</a>
       </div>
 
       <div class="nav-actions">
