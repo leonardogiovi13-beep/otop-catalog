@@ -32,6 +32,17 @@ export class ProductService {
       lots = p.lots;
     }
 
+    if (!Array.isArray(lots) || lots.length === 0) {
+      const price = p.price || 100;
+      const stock = p.stock || 20;
+      const lot1Stock = Math.max(1, Math.floor(stock * 0.6));
+      const lot2Stock = Math.max(1, stock - lot1Stock);
+      lots = [
+        { lotNumber: 'ล็อตที่ 1', price: price, stock: lot1Stock },
+        { lotNumber: 'ล็อตที่ 2', price: price, stock: lot2Stock }
+      ];
+    }
+
     return {
       ...p,
       images,

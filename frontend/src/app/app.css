@@ -698,41 +698,71 @@
 
 .lot-row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1.5fr auto;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 10px;
-  padding: 8px 10px;
+  grid-template-columns: 1.5fr 1.2fr 1.2fr auto;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+  padding: 12px 14px;
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.lot-row input {
-  padding: 8px 10px;
-  font-size: 0.88rem;
-  border: 1px solid #cbd5e1;
+.lot-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lot-input-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.lot-col input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border: 1.5px solid #cbd5e1;
   border-radius: 8px;
+  box-sizing: border-box;
+  background: #f8fafc;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.lot-col input:focus {
+  outline: none;
+  border-color: var(--primary-dark);
+  background: #ffffff;
+}
+
+.lot-col-action {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 2px;
 }
 
 .btn-delete-lot {
   background: #fee2e2;
-  color: #ef4444;
-  border: none;
-  width: 32px;
-  height: 32px;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
+  gap: 4px;
+  transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .btn-delete-lot:hover {
   background: #fca5a5;
-  color: #b91c1c;
+  color: #991b1b;
 }
 
 .lots-empty {
@@ -860,13 +890,13 @@
 
 .btn-add-cart-card {
   flex: 1;
-  background: var(--primary-dark);
-  color: white;
-  border: none;
+  background: #ffffff;
+  color: #000000 !important;
+  border: 1.5px solid #000000;
   padding: 8px 14px;
   border-radius: 20px;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -876,14 +906,48 @@
 }
 
 .btn-add-cart-card:hover:not(:disabled) {
-  background: #0f172a;
+  background: #f1f5f9;
+  color: #000000 !important;
   transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-add-cart-card:disabled {
-  background: #94a3b8;
+  background: #f1f5f9;
+  color: #64748b !important;
+  border-color: #cbd5e1;
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.btn-add-cart-modal {
+  width: 100%;
+  background: #ffffff;
+  color: #000000 !important;
+  border: 2px solid #000000;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-add-cart-modal:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #000000 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-add-cart-modal:disabled {
+  background: #f1f5f9;
+  color: #64748b !important;
+  border-color: #cbd5e1;
+  cursor: not-allowed;
 }
 
 .admin-actions-inline {

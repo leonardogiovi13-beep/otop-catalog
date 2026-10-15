@@ -190,7 +190,7 @@
         <!-- ปุ่มเพิ่มลงตะกร้าใน Modal -->
         <div class="mt-4">
           <button 
-            class="btn-dark-pill w-100" 
+            class="btn-add-cart-modal w-100" 
             (click)="addToCart(selectedProduct); closeModal()"
             [disabled]="getProductStock(selectedProduct) <= 0">
             🛒 เพิ่มสินค้านี้ลงในตะกร้า
@@ -377,17 +377,20 @@
 
       <div class="lot-list" *ngIf="productForm.lots && productForm.lots.length > 0">
         <div class="lot-row" *ngFor="let lot of productForm.lots; let i = index">
-          <div>
-            <input type="text" [(ngModel)]="lot.lotNumber" placeholder="ชื่อล็อต เช่น ล็อตที่ 1">
+          <div class="lot-col">
+            <label class="lot-input-label">ชื่อล็อต</label>
+            <input type="text" [(ngModel)]="lot.lotNumber" placeholder="เช่น ล็อตที่ {{ i + 1 }}">
           </div>
-          <div>
-            <input type="number" [(ngModel)]="lot.price" placeholder="ราคา (บาท) *" min="0">
+          <div class="lot-col">
+            <label class="lot-input-label">ราคา (บาท) <span class="required-star">*</span></label>
+            <input type="number" [(ngModel)]="lot.price" placeholder="ใส่ราคา (บาท)" min="0">
           </div>
-          <div>
-            <input type="number" [(ngModel)]="lot.stock" placeholder="จำนวนสินค้า *" min="0">
+          <div class="lot-col">
+            <label class="lot-input-label">จำนวนสินค้า (ชิ้น) <span class="required-star">*</span></label>
+            <input type="number" [(ngModel)]="lot.stock" placeholder="ใส่จำนวนสินค้า (ชิ้น)" min="0">
           </div>
-          <div>
-            <button type="button" class="btn-delete-lot" (click)="removeLot(i)" title="ลบล็อตนี้">🗑️</button>
+          <div class="lot-col-action">
+            <button type="button" class="btn-delete-lot" (click)="removeLot(i)" title="ลบล็อตนี้">🗑️ ลบ</button>
           </div>
         </div>
       </div>

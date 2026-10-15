@@ -268,11 +268,24 @@ export class App implements OnInit {
       if (typeof lots === 'string') {
         try { lots = JSON.parse(lots); } catch { lots = []; }
       }
+      const price = item.price !== undefined && item.price !== null && item.price > 0 ? item.price : ((item.id * 37) % 350 + 80);
+      const stock = item.stock !== undefined && item.stock !== null && item.stock > 0 ? item.stock : ((item.id * 13) % 45 + 15);
+
+      // เพิ่มล็อตสินค้าในรายการสินค้าที่ยังไม่มีล็อต
+      if (!Array.isArray(lots) || lots.length === 0) {
+        const lot1Stock = Math.max(1, Math.floor(stock * 0.6));
+        const lot2Stock = Math.max(1, stock - lot1Stock);
+        lots = [
+          { lotNumber: 'ล็อตที่ 1', price: price, stock: lot1Stock },
+          { lotNumber: 'ล็อตที่ 2', price: price, stock: lot2Stock }
+        ];
+      }
+
       return {
         ...item,
-        lots: Array.isArray(lots) ? lots : [],
-        price: item.price !== undefined && item.price !== null && item.price > 0 ? item.price : ((item.id * 37) % 350 + 80),
-        stock: item.stock !== undefined && item.stock !== null && item.stock > 0 ? item.stock : ((item.id * 13) % 45 + 15)
+        lots,
+        price,
+        stock
       };
     });
   }
@@ -508,7 +521,17 @@ export class App implements OnInit {
     const images = Array.isArray(product.images) && product.images.length > 0
       ? [...product.images]
       : (product.imageUrl ? [product.imageUrl] : []);
-    const lots = Array.isArray(product.lots) ? JSON.parse(JSON.stringify(product.lots)) : [];
+    let lots = Array.isArray(product.lots) ? JSON.parse(JSON.stringify(product.lots)) : [];
+    if (!lots || lots.length === 0) {
+      const price = product.price || 100;
+      const stock = product.stock || 20;
+      const lot1Stock = Math.max(1, Math.floor(stock * 0.6));
+      const lot2Stock = Math.max(1, stock - lot1Stock);
+      lots = [
+        { lotNumber: 'ล็อตที่ 1', price: price, stock: lot1Stock },
+        { lotNumber: 'ล็อตที่ 2', price: price, stock: lot2Stock }
+      ];
+    }
     this.productForm = {
       ...product,
       images,
@@ -614,8 +637,8 @@ export class App implements OnInit {
     const nextNumber = this.productForm.lots.length + 1;
     this.productForm.lots.push({
       lotNumber: `ล็อตที่ ${nextNumber}`,
-      price: 0,
-      stock: 0
+      price: null as any,
+      stock: null as any
     });
   }
 
