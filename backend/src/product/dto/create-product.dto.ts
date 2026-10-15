@@ -1,8 +1,9 @@
 export class CreateProductDto {
   name: string;
   category?: string;
-  zone?: string;
   province?: string;
+  district?: string;
+  subDistrict?: string;
   description?: string;
   producerName?: string;
   phone?: string;

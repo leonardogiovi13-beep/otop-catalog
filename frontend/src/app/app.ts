@@ -17,11 +17,29 @@ export class App implements OnInit {
   producers: CommunityProducer[] = MOCK_PRODUCERS;
   
   selectedCategory: string = 'ทั้งหมด';
-  selectedZone: string = 'ทั้งหมด';
   searchTerm: string = '';
   selectedProduct: Product | null = null;
 
-  zones: string[] = ['ทั้งหมด', 'อ่าวไทย', 'อันดามัน', 'ชายแดนใต้'];
+  // Southern provinces and hierarchical location data
+  southernProvinces: string[] = ['สงขลา','ยะลา','นราธิวาส','ตรัง','พังงา','ภูเก็ต','สุราษฎร์ธานี','สตูล'];
+
+  districtsByProvince: { [province: string]: string[] } = {
+    'สงขลา': ['อัมพวา','หาดใหญ่'],
+    'ยะลา': ['ยะลาตอนเหนือ','ยะลาตอนใต้'],
+    'นราธิวาส': ['นราธิวาสเหนือ','นราธิวาสใต้'],
+    'ตรัง': ['อุโมงค์','เขาตะบง'],
+    'พังงา': ['อุทัยธานี','เกาะพงัน'],
+    'ภูเก็ต': ['เมืองภูเก็ต','ถลาง'],
+    'สุราษฎร์ธานี': ['อำเภอเมือง','อัมพวา'],
+    'สตูล': ['เมืองสตูล','อีสาน']
+  };
+
+  subDistrictsByDistrict: { [district: string]: string[] } = {
+    'อัมพวา': ['ตำบลหัวไชย','ตำบลถนนมอ'],
+    'หาดใหญ่': ['ตำบลศรีสว่าง','ตำบลหาดใหญ่']
+    // Additional mappings can be added as needed
+  };
+
   categories: string[] = ['ทั้งหมด', 'อาหาร', 'เครื่องดื่ม', 'ผ้าและเครื่องแต่งกาย', 'สมุนไพร/ของใช้', 'ของประดับตกแต่ง', 'ของใช้'];
 
   // สถานะผู้ใช้งาน

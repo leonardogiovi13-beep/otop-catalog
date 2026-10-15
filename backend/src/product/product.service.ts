@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 // ฟิลด์ที่อนุญาตให้บันทึก (กันฟิลด์แปลกปลอมที่ทำให้ Prisma error)
 const ALLOWED_FIELDS = [
-  'name', 'category', 'zone', 'province', 'description', 'producerName',
+  'name', 'category', 'province', 'district', 'subDistrict', 'description', 'producerName',
   'phone', 'imageUrl', 'price', 'stock', 'isFeatured', 'isLatest',
 ] as const;
 

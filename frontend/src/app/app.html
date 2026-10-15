@@ -224,17 +224,27 @@
     <h2>{{ isEditing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่' }}</h2>
     <div class="form-grid">
       <div class="form-group"><label>ชื่อสินค้า *</label><input type="text" [(ngModel)]="productForm.name"></div>
-      <div class="form-group"><label>จังหวัด *</label><input type="text" [(ngModel)]="productForm.province"></div>
+      <div class="form-group"><label>จังหวัด *</label>
+        <select [(ngModel)]="productForm.province" class="form-input">
+          <option *ngFor="let p of southernProvinces" [value]="p">{{ p }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>อำเภอ *</label>
+        <select [(ngModel)]="productForm.district" class="form-input" [disabled]="!productForm.province">
+          <option *ngFor="let d of (districtsByProvince[productForm.province] || [])" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ตำบล *</label>
+        <select [(ngModel)]="productForm.subDistrict" class="form-input" [disabled]="!productForm.district">
+          <option *ngFor="let s of (subDistrictsByDistrict[productForm.district] || [])" [value]="s">{{ s }}</option>
+        </select>
+      </div>
       <div class="form-group">
         <label>หมวดหมู่</label>
         <select [(ngModel)]="productForm.category" class="form-input">
           <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>ภูมิภาค</label>
-        <select [(ngModel)]="productForm.zone" class="form-input">
-          <option *ngFor="let z of zones" [value]="z">{{ z }}</option>
         </select>
       </div>
       <div class="form-group"><label>ผู้ผลิต</label><input type="text" [(ngModel)]="productForm.producerName"></div>

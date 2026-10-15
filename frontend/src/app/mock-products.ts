@@ -2,8 +2,9 @@ export interface Product {
   id: number;
   name: string;
   category: string;
-  zone: string;
   province: string;
+  district?: string;
+  subDistrict?: string;
   description?: string;
   producerName?: string;
   imageUrl?: string;
@@ -13,7 +14,7 @@ export interface Product {
   isFeatured: boolean;
   isLatest: boolean;
   createdAt?: string;
-  
+}  
 }
 
 export interface CommunityProducer {
