@@ -287,8 +287,6 @@ export class App implements OnInit {
     this.editingId = null;
     this.productForm = {
       name: '', 
-      price: null,  
-      stock: null,  
       category: 'อาหาร', 
       zone: 'อ่าวไทย', 
       province: '',
@@ -379,22 +377,12 @@ export class App implements OnInit {
       return;
     }
 
-    if (!this.productForm.price || Number(this.productForm.price) <= 0) {
-      alert('⚠️ กรุณาระบุราคาสินค้าให้ถูกต้อง (ต้องมากกว่า 0)');
-      return;
-    }
-
-    if (this.productForm.stock === null || this.productForm.stock === undefined || Number(this.productForm.stock) < 0) {
-      alert('⚠️ กรุณาระบุจำนวนสินค้าให้ถูกต้อง (ห้ามติดลบ)');
-      return;
-    }
-
-    const { id, ...restForm } = this.productForm;
+    const { id, price, stock, ...restForm } = this.productForm;
     
     const payload = {
       ...restForm,
-      price: Number(this.productForm.price),
-      stock: Number(this.productForm.stock)
+      price: price !== undefined && price !== null ? Number(price) : 0,
+      stock: stock !== undefined && stock !== null ? Number(stock) : 0
     };
 
     if (this.isEditing && this.editingId) {

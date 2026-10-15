@@ -23,19 +23,18 @@ export class ProductService {
     if (isCreate && (typeof data.name !== 'string' || !data.name.trim())) {
       throw new BadRequestException('กรุณาระบุชื่อสินค้า');
     }
-    if (isCreate || data.price !== undefined) {
+    if (data.price !== undefined && data.price !== null) {
       const price = Number(data.price);
-      if (!Number.isFinite(price) || price <= 0) {
-        throw new BadRequestException('ราคาสินค้าต้องมากกว่า 0');
-      }
-      data.price = Math.round(price);
+      data.price = Number.isFinite(price) && price >= 0 ? Math.round(price) : 0;
+    } else if (isCreate) {
+      data.price = 0;
     }
-    if (isCreate || data.stock !== undefined) {
+
+    if (data.stock !== undefined && data.stock !== null) {
       const stock = Number(data.stock);
-      if (!Number.isFinite(stock) || stock < 0) {
-        throw new BadRequestException('จำนวนสต๊อกต้องไม่ติดลบ');
-      }
-      data.stock = Math.round(stock);
+      data.stock = Number.isFinite(stock) && stock >= 0 ? Math.round(stock) : 0;
+    } else if (isCreate) {
+      data.stock = 0;
     }
     return data;
   }

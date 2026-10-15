@@ -95,7 +95,6 @@
             <div class="location-badge">
               <span class="dot"></span> จังหวัด{{ product.province }}
             </div>
-            <div class="prod-price" *ngIf="product.price">฿{{ product.price | number }}</div>
             
             <!-- ปุ่มจัดการของ Admin -->
             <div class="admin-actions" *ngIf="isAdmin" (click)="$event.stopPropagation()">
@@ -129,8 +128,6 @@
         <ul class="meta-list">
           <li><strong>หมวดหมู่:</strong> {{ selectedProduct.category }}</li>
           <li><strong>จังหวัด:</strong> {{ selectedProduct.province }}</li>
-          <li *ngIf="selectedProduct.price"><strong>ราคา:</strong> ฿{{ selectedProduct.price | number }}</li>
-          <li *ngIf="selectedProduct.stock !== undefined"><strong>คงเหลือ:</strong> {{ selectedProduct.stock }} ชิ้น</li>
           <li><strong>ผู้ผลิต:</strong> {{ selectedProduct.producerName || '-' }}</li>
           <li><strong>ติดต่อ:</strong> <span class="phone">{{ selectedProduct.phone || '-' }}</span></li>
         </ul>
@@ -240,8 +237,6 @@
           <option *ngFor="let z of zones" [value]="z">{{ z }}</option>
         </select>
       </div>
-      <div class="form-group"><label>ราคา (บาท) *</label><input type="number" min="1" [(ngModel)]="productForm.price"></div>
-      <div class="form-group"><label>จำนวนสต๊อก *</label><input type="number" min="0" [(ngModel)]="productForm.stock"></div>
       <div class="form-group"><label>ผู้ผลิต</label><input type="text" [(ngModel)]="productForm.producerName"></div>
       <div class="form-group"><label>เบอร์โทร</label><input type="text" [(ngModel)]="productForm.phone"></div>
     </div>

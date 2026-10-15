@@ -7,8 +7,8 @@ export class CreateProductDto {
   producerName?: string;
   phone?: string;
   imageUrl?: string;
-  price: number;
-  stock: number;
+  price?: number;
+  stock?: number;
   isFeatured?: boolean;
   isLatest?: boolean;
 }
